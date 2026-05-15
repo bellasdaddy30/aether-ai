@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AETHER — Premium AI Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <style>
+    /* ── Landing-specific ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(180,140,60,0.12) 0%, transparent 70%);
+      top: -200px; left: -200px;
+      animation: drift1 18s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(100,60,200,0.08) 0%, transparent 70%);
+      bottom: -150px; right: -100px;
+      animation: drift2 22s ease-in-out infinite;
+    }
+    @keyframes drift1 {
+      0%,100%  { transform: translate(0,0); }
+      50%      { transform: translate(60px,40px); }
+    }
+    @keyframes drift2 {
+      0%,100%  { transform: translate(0,0); }
+      50%      { transform: translate(-40px,-60px); }
+    }
+
+    .hero-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 2rem;
+      position: relative; z-index: 1;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+
+    .hero-logo {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(4rem, 12vw, 9rem);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      line-height: 1;
+      background: linear-gradient(135deg, #c9a84c 0%, #f2d07a 40%, #c9a84c 70%, #8a6a20 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative; z-index: 1;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.4s forwards;
+      text-shadow: none;
+      filter: drop-shadow(0 0 60px rgba(201,168,76,0.25));
+    }
+
+    .hero-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 1.2rem;
+      position: relative; z-index: 1;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.6s forwards;
+      max-width: 600px;
+    }
+
+    .divider-line {
+      width: 120px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 2.5rem auto;
+      position: relative; z-index: 1;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.8s forwards;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative; z-index: 1;
+      opacity: 0;
+      animation: fadeUp 0.9s 1s forwards;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #c9a84c, #f2d07a);
+      color: #0a0a0f;
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.9rem 2.4rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #f2d07a, #c9a84c);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(201,168,76,0.35);
+    }
+
+    .btn-ghost {
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.9rem 2.4rem;
+      background: transparent;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201,168,76,0.05);
+    }
+
+    /* Features */
+    .features {
+      padding: 8rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 600;
+      text-align: center;
+      color: var(--text-primary);
+      margin-bottom: 4rem;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5px;
+      background: rgba(201,168,76,0.08);
+    }
+    .feature-card {
+      background: var(--surface);
+      padding: 2.5rem 2rem;
+      transition: background 0.3s;
+    }
+    .feature-card:hover { background: var(--surface-hover); }
+    .feature-icon {
+      font-size: 1.6rem;
+      margin-bottom: 1.2rem;
+      display: block;
+    }
+    .feature-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--gold-dim);
+      margin-bottom: 0.8rem;
+    }
+    .feature-desc {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* Pricing */
+    .pricing {
+      padding: 8rem 2rem;
+      background: var(--bg-deep);
+    }
+    .pricing-inner { max-width: 1100px; margin: 0 auto; }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1px;
+      background: rgba(201,168,76,0.08);
+      margin-top: 4rem;
+    }
+    .price-card {
+      background: var(--surface);
+      padding: 3rem 2.5rem;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .price-card.featured {
+      background: linear-gradient(145deg, rgba(201,168,76,0.06), var(--surface));
+    }
+    .price-card.featured::before {
+      content: 'MOST POPULAR';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      color: #0a0a0f;
+      background: var(--gold);
+      padding: 0.3rem 1.2rem;
+    }
+    .price-tier {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1.5rem;
+    }
+    .price-amount {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .price-amount sup { font-size: 1.2rem; vertical-align: top; margin-top: 0.8rem; }
+    .price-period {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      margin-top: 0.4rem;
+      margin-bottom: 2rem;
+    }
+    .price-divider {
+      height: 1px;
+      background: rgba(201,168,76,0.12);
+      margin-bottom: 2rem;
+    }
+    .price-features { list-style: none; padding: 0; margin: 0 0 2.5rem; }
+    .price-features li {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--text-muted);
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .price-features li::before {
+      content: '◆';
+      font-size: 0.5rem;
+      color: var(--gold-dim);
+      flex-shrink: 0;
+    }
+    .price-features li.unavail { opacity: 0.35; }
+    .price-features li.unavail::before { content: '◇'; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(201,168,76,0.08);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    .footer-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+    }
+    .footer-copy {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+    footer nav { margin: 1.5rem 0; display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+    footer nav a {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    footer nav a:hover { color: var(--gold-dim); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stars canvas */
+    #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+
+  <!-- Navigation -->
+  <nav class="nav" style="position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:rgba(8,8,12,0.8);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.06);">
+    <span style="font-family:'Cinzel',serif;font-size:1rem;font-weight:600;letter-spacing:0.3em;color:var(--gold-dim);">AETHER</span>
+    <div style="display:flex;gap:1rem;align-items:center;">
+      <a href="#pricing" class="btn-ghost" style="padding:0.5rem 1.4rem;font-size:0.7rem;">Pricing</a>
+      <a href="/app" class="btn-primary" style="padding:0.5rem 1.4rem;font-size:0.7rem;">Enter</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <p class="hero-eyebrow">Premium Intelligence · Unrestricted Dialogue</p>
+    <h1 class="hero-logo">AETHER</h1>
+    <p class="hero-tagline">Where conversation transcends the ordinary.<br/>An AI companion with depth, wit, and absolute presence.</p>
+    <div class="divider-line"></div>
+    <div class="hero-cta-group">
+      <a href="/app" class="btn-primary">Begin Your Session</a>
+      <a href="#features" class="btn-ghost">Explore</a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <p class="section-label">Capabilities</p>
+    <h2 class="section-title">Intelligence, Perfected</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">◈</span>
+        <div class="feature-title">Deep Conversation</div>
+        <p class="feature-desc">Streaming AI dialogue powered by the world's most sophisticated language models via OpenRouter. No hollow filler. Just thought.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">◎</span>
+        <div class="feature-title">Voice Synthesis</div>
+        <p class="feature-desc">ElevenLabs neural voices bring AETHER to life with natural cadence and emotional range. Speak freely. Be heard.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">◇</span>
+        <div class="feature-title">Image Creation</div>
+        <p class="feature-desc">Generate stunning visuals via Stable Diffusion XL and Flux. From abstract concepts to photorealistic scenes, articulate the unimaginable.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⬡</span>
+        <div class="feature-title">WebXR Immersion</div>
+        <p class="feature-desc">Step inside the conversation. God-Mode members access a full VR environment — AETHER as a spatial presence, not just text on a screen.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⊕</span>
+        <div class="feature-title">Custom Persona</div>
+        <p class="feature-desc">Define AETHER's character with your own system prompt. Shape personality, expertise, tone — make the intelligence truly yours.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">∞</span>
+        <div class="feature-title">Persistent Memory</div>
+        <p class="feature-desc">Conversations are preserved. Return to any thread. Build context over time. AETHER remembers what matters to you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <div class="pricing-inner">
+      <p class="section-label">Membership</p>
+      <h2 class="section-title">Choose Your Level</h2>
+      <div class="pricing-grid">
+        <!-- Basics -->
+        <div class="price-card">
+          <div class="price-tier">Basics</div>
+          <div class="price-amount"><sup>$</sup>9<span style="font-size:1.5rem">.99</span></div>
+          <div class="price-period">/ month</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li>50 messages per day</li>
+            <li>Mistral 7B model</li>
+            <li>5 images per day (SDXL)</li>
+            <li>Conversation history</li>
+            <li>Custom system prompt</li>
+            <li class="unavail">Voice TTS/STT</li>
+            <li class="unavail">Flux image models</li>
+            <li class="unavail">VR mode</li>
+          </ul>
+          <button class="btn-ghost" style="width:100%;" onclick="checkout('basics')">Select Basics</button>
+        </div>
+
+        <!-- Elite -->
+        <div class="price-card featured">
+          <div class="price-tier">Elite</div>
+          <div class="price-amount"><sup>$</sup>24<span style="font-size:1.5rem">.99</span></div>
+          <div class="price-period">/ month</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li>500 messages per day</li>
+            <li>Hermes 70B model</li>
+            <li>20 images per day (Flux Schnell)</li>
+            <li>Voice TTS + STT</li>
+            <li>Custom system prompt</li>
+            <li>Conversation history</li>
+            <li class="unavail">Flux Pro model</li>
+            <li class="unavail">VR mode</li>
+          </ul>
+          <button class="btn-primary" style="width:100%;clip-path:none;" onclick="checkout('elite')">Select Elite</button>
+        </div>
+
+        <!-- God-Mode -->
+        <div class="price-card">
+          <div class="price-tier">God-Mode</div>
+          <div class="price-amount"><sup>$</sup>49<span style="font-size:1.5rem">.99</span></div>
+          <div class="price-period">/ month</div>
+          <div class="price-divider"></div>
+          <ul class="price-features">
+            <li>Unlimited messages</li>
+            <li>Claude Sonnet (premium model)</li>
+            <li>Unlimited images (Flux Pro)</li>
+            <li>Voice TTS + STT</li>
+            <li>WebXR VR Mode</li>
+            <li>Custom system prompt</li>
+            <li>Priority generation</li>
+            <li>All future features</li>
+          </ul>
+          <button class="btn-ghost" style="width:100%;border-color:var(--gold);color:var(--gold);" onclick="checkout('godmode')">Select God-Mode</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">AETHER</div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="/app">Enter</a>
+    </nav>
+    <p class="footer-copy">© 2025 AETHER AI. Premium intelligence, responsibly delivered.</p>
+  </footer>
+
+  <script>
+    // ── Starfield ──────────────────────────────────────────
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = Array.from({ length: 180 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2,
+        a: Math.random(),
+        speed: 0.0003 + Math.random() * 0.0005,
+      }));
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const now = Date.now();
+      stars.forEach(s => {
+        s.a = 0.3 + 0.7 * Math.abs(Math.sin(now * s.speed + s.x));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(242,208,122,${s.a * 0.6})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    resize();
+    initStars();
+    drawStars();
+    window.addEventListener('resize', () => { resize(); initStars(); });
+
+    // ── Pricing CTA ─────────────────────────────────────
+    function checkout(tier) {
+      const token = localStorage.getItem('aether_token');
+      if (!token) {
+        window.location.href = '/app?intent=upgrade&tier=' + tier;
+        return;
+      }
+      const prices = {
+        basics:  'price_1TWeLvC7RoPzfHX41hqGpzvM',
+        elite:   'price_1TWeMOC7RoPzfHX4vFzcTmd5',
+        godmode: 'price_1TWeNKC7RoPzfHX4luOOxWkO',
+      };
+      fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ priceId: prices[tier] }),
+      })
+      .then(r => r.json())
+      .then(d => { if (d.url) window.location.href = d.url; })
+      .catch(console.error);
+    }
+  </script>
+</body>
+</html>
