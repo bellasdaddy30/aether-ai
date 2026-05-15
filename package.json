@@ -1,7 +1,7 @@
 {
   "name": "aether-ai",
   "version": "1.0.0",
-  "description": "AETHER — Premium Unfiltered AI Companion",
+  "description": "AETHER \u2014 Premium Unfiltered AI Companion",
   "main": "server/index.js",
   "type": "commonjs",
   "scripts": {
@@ -23,6 +23,6 @@
     "undici": "^6.10.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   }
 }
