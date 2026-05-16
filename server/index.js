@@ -8,12 +8,37 @@ const { initDb } = require('./db/database');
 initDb();
 
 // ── Server setup ──────────────────────────────────────────────
-// Note: We removed the local HTTPS/Certs logic. 
-// Railway handles SSL/HTTPS at the proxy level. Your app should be pure HTTP.
 const fastify = Fastify({
   logger: process.env.NODE_ENV !== 'production',
   trustProxy: true,
   bodyLimit: 1048576,
+});
+
+// ── Global Process Safety Catchers (Prevents Railway 502 Crashes) ──
+process.on('uncaughtException', (err) => {
+  console.error('CRITICAL UNCAUGHT EXCEPTION:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('CRITICAL UNHANDLED REJECTION AT:', promise, 'REASON:', reason);
+});
+
+// ── Global Fastify Error Handling ──────────────────────────────
+fastify.setErrorHandler(function (error, request, reply) {
+  request.log.error(error);
+  
+  if (error.validation) {
+    return reply.status(400).send({
+      error: 'Validation Failed',
+      message: error.message,
+      details: error.validation
+    });
+  }
+
+  reply.status(500).send({ 
+    error: 'Internal Server Error', 
+    message: error.message || 'An unexpected backend failure occurred.' 
+  });
 });
 
 // ── Plugins ───────────────────────────────────────────────────
@@ -45,9 +70,9 @@ fastify.addContentTypeParser(
   }
 );
 
-// ── Static Files ──────────────────────────────────────────────
+// Serve Static Assets
 fastify.register(require('@fastify/static'), {
-  root: path.join(__dirname, '../public'),
+  root: path.resolve(__dirname, '../public'),
   prefix: '/',
 });
 
@@ -78,17 +103,14 @@ fastify.get('/health', async () => ({
 
 // ── Start ─────────────────────────────────────────────────────
 const start = async () => {
-  // Use the port Railway provides, or 3000 for local dev
   const port = Number(process.env.PORT) || 3000;
+  const host = '0.0.0.0'; // Essential configuration for Railway edge binding
   
-  // You MUST use 0.0.0.0 on Railway
-  const host = '0.0.0.0'; 
-
   try {
     await fastify.listen({ port, host });
-    console.log(`[SERVER] AETHER Online: http://${host}:${port}`);
+    console.log(`[SERVER] AETHER running smoothly on http://${host}:${port}`);
   } catch (err) {
-    console.error('Error starting server:', err);
+    fastify.log.error(err);
     process.exit(1);
   }
 };

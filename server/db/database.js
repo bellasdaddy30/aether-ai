@@ -1,10 +1,9 @@
 'use strict';
 /**
  * AETHER — Database Layer
- * Uses Node 22+ built-in `node:sqlite` — zero native compilation needed.
- * API mirrors better-sqlite3: prepare/run/get/all work identically.
+ * Uses battle-tested better-sqlite3 for synchronous performance and safety.
  */
-const { DatabaseSync } = require('node:sqlite');
+const Database = require('better-sqlite3');
 const path = require('path');
 require('dotenv').config();
 
@@ -15,14 +14,15 @@ let db;
 function getDb() {
   if (db) return db;
 
-  db = new DatabaseSync(path.resolve(DB_PATH));
+  // Initialize better-sqlite3 instead of native experimental module
+  db = new Database(path.resolve(DB_PATH));
 
-  // WAL mode + performance pragmas
-  db.exec("PRAGMA journal_mode = WAL");
-  db.exec("PRAGMA synchronous = NORMAL");
-  db.exec("PRAGMA cache_size = -8000"); // 8MB cache
-  db.exec("PRAGMA foreign_keys = ON");
-  db.exec("PRAGMA temp_store = MEMORY");
+  // WAL mode + production-grade performance pragmas
+  db.pragma("journal_mode = WAL");
+  db.pragma("synchronous = NORMAL");
+  db.pragma("cache_size = -8000"); // 8MB cache
+  db.pragma("foreign_keys = ON");
+  db.pragma("temp_store = MEMORY");
 
   return db;
 }
@@ -42,16 +42,16 @@ function initDb() {
       subscription_status  TEXT DEFAULT 'inactive',
       messages_today  INTEGER NOT NULL DEFAULT 0,
       images_today    INTEGER NOT NULL DEFAULT 0,
-      last_reset_date TEXT    NOT NULL DEFAULT (date('now')),
-      system_prompt   TEXT    DEFAULT '',
-      created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
-      updated_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+      last_reset_date TEXT    NOT NULL,
+      system_prompt   TEXT,
+      created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+      updated_at      TEXT    NOT NULL DEFAULT (datetime('now'))
     );
 
     CREATE TABLE IF NOT EXISTS conversations (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      title       TEXT    NOT NULL DEFAULT 'New Conversation',
+      title       TEXT    NOT NULL,
       model       TEXT    NOT NULL,
       created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
       updated_at  TEXT    NOT NULL DEFAULT (datetime('now'))
