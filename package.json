@@ -1,15 +1,16 @@
 {
   "name": "aether-ai",
   "version": "1.0.0",
-  "description": "AETHER \u2014 Premium Unfiltered AI Companion",
+  "description": "AETHER - Premium Unfiltered AI Companion",
   "main": "server/index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node --max-old-space-size=512 --optimize-for-size --no-warnings=ExperimentalWarning server/index.js",
+    "start": "node server/index.js",
     "dev": "node --max-old-space-size=512 --optimize-for-size --no-warnings=ExperimentalWarning --watch server/index.js",
     "setup-db": "node server/db/init.js"
   },
   "dependencies": {
+    "express": "^4.19.2",
     "fastify": "^4.26.0",
     "@fastify/static": "^7.0.3",
     "@fastify/cors": "^9.0.1",
@@ -23,6 +24,6 @@
     "undici": "^6.10.1"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.x"
   }
 }
