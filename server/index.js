@@ -8,19 +8,12 @@ const { initDb } = require('./db/database');
 initDb();
 
 // ── Server setup ──────────────────────────────────────────────
-const fs = require('fs');
-const https = fs.existsSync('./certs/cert.pem');
-
+// Note: We removed the local HTTPS/Certs logic. 
+// Railway handles SSL/HTTPS at the proxy level. Your app should be pure HTTP.
 const fastify = Fastify({
   logger: process.env.NODE_ENV !== 'production',
   trustProxy: true,
   bodyLimit: 1048576,
-  ...(https ? {
-    https: {
-      key:  fs.readFileSync('./certs/key.pem'),
-      cert: fs.readFileSync('./certs/cert.pem'),
-    }
-  } : {}),
 });
 
 // ── Plugins ───────────────────────────────────────────────────
@@ -46,23 +39,19 @@ fastify.addContentTypeParser(
       const str = body.toString('utf8').trim();
       done(null, str ? JSON.parse(str) : {});
     } catch (err) {
+      err.statusCode = 400;
       done(err);
     }
   }
 );
 
-// ── Static files ──────────────────────────────────────────────
+// ── Static Files ──────────────────────────────────────────────
 fastify.register(require('@fastify/static'), {
-  root: path.join(__dirname, '..', 'public'),
+  root: path.join(__dirname, '../public'),
   prefix: '/',
-  decorateReply: true,
-  setHeaders(res) {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  },
 });
 
-// ── API Routes ────────────────────────────────────────────────
+// ── Routes ────────────────────────────────────────────────────
 fastify.register(require('./routes/auth'),   { prefix: '/api/auth' });
 fastify.register(require('./routes/chat'),   { prefix: '/api/chat' });
 fastify.register(require('./routes/image'),  { prefix: '/api/image' });
@@ -72,7 +61,6 @@ fastify.register(require('./routes/stripe'), { prefix: '/api/stripe' });
 // ── SPA fallback ──────────────────────────────────────────────
 fastify.setNotFoundHandler((request, reply) => {
   const url = request.url;
-  // Serve HTML pages
   if (!url.startsWith('/api') && !url.includes('.')) {
     const page = url === '/app' ? 'app.html' : url === '/vr' ? 'vr.html' : 'index.html';
     return reply.sendFile(page);
@@ -90,22 +78,19 @@ fastify.get('/health', async () => ({
 
 // ── Start ─────────────────────────────────────────────────────
 const start = async () => {
-  const port = parseInt(process.env.PORT || '3000');
-  const host = process.env.HOST || '0.0.0.0';
+  // Use the port Railway provides, or 3000 for local dev
+  const port = Number(process.env.PORT) || 3000;
+  
+  // You MUST use 0.0.0.0 on Railway
+  const host = '0.0.0.0'; 
 
   try {
     await fastify.listen({ port, host });
-    console.log(`\n🌌 AETHER is live at http://localhost:${port}\n`);
+    console.log(`[SERVER] AETHER Online: http://${host}:${port}`);
   } catch (err) {
-    fastify.log.error(err);
+    console.error('Error starting server:', err);
     process.exit(1);
   }
 };
-
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  await fastify.close();
-  process.exit(0);
-});
 
 start();
