@@ -10,7 +10,6 @@
     "setup-db": "node server/db/init.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
     "fastify": "^4.26.0",
     "@fastify/static": "^7.0.3",
     "@fastify/cors": "^9.0.1",
