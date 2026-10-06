@@ -1,0 +1,45 @@
+# Copy to config.yaml and edit.  python -m tradebot --help
+
+symbols:
+  - SPY        # stock / ETF
+  - BTC/USD    # crypto (Alpaca format; yfinance uses BTC-USD, converted automatically)
+
+timeframe: 1Day          # 1Day or 1Hour
+history_bars: 600        # bars fetched each loop (ML strategy needs ~300+)
+
+strategy:
+  name: ensemble         # sma_cross | rsi_reversion | ml | ensemble
+  params:
+    sma_cross: {fast: 20, slow: 50}
+    rsi_reversion: {period: 14, buy_below: 30, sell_above: 55, trend_sma: 200}
+    ml:
+      horizon: 5           # predict whether price is up over the next N bars
+      min_return: 0.0      # ...by more than this (e.g. 0.005 = 0.5%)
+      threshold: 0.55      # go long only if model probability >= this
+      train_window: 750    # bars of history the model trains on
+      retrain_every: 20    # retrain cadence in bars (walk-forward)
+      min_train: 250
+    ensemble:
+      members: [sma_cross, rsi_reversion, ml]
+      min_votes: 2         # how many members must say "long"
+
+risk:
+  max_position_pct: 0.20     # max 20% of equity in any one symbol
+  risk_per_trade: 0.01       # lose at most ~1% of equity if the stop hits
+  stop_loss_pct: 0.05        # 5% stop below entry
+  take_profit_pct: 0.15      # 15% target above entry (0 = disabled)
+  max_daily_loss_pct: 0.03   # kill switch: flatten everything and halt at -3% on the day
+  max_open_positions: 4
+  min_order_usd: 5           # skip dust orders
+
+backtest:
+  initial_cash: 10000
+  fee_bps: 0           # Alpaca stocks are commission-free
+  crypto_fee_bps: 25   # Alpaca crypto taker fee is roughly 0.15-0.25%; check current schedule
+  slippage_bps: 5
+
+live:
+  broker: alpaca       # alpaca | local (local = offline simulated broker)
+  poll_seconds: 300
+  journal_path: logs/trades.csv
+  state_path: state/bot_state.json

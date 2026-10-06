@@ -1,0 +1,8 @@
+# Python 3.10+ (tested on 3.13)
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+PyYAML>=6.0
+yfinance>=0.2.40      # free historical data for backtests, no API key
+alpaca-py>=0.30       # free paper trading (stocks + crypto); only needed for paper/live
+pytest>=8.0
