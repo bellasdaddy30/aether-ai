@@ -4,6 +4,8 @@ A paper-first trading bot in Python. It backtests strategies on free historical 
 then runs them against an **Alpaca paper account** (fake money, free, no credit card).
 Stocks/ETFs and crypto run through the same code.
 
+> New here? Open **START_HERE.md** first.
+>
 > **Read this first.** Most retail trading bots lose money, and an ML model that
 > looks brilliant in a backtest is usually leaking future data or overfit to noise.
 > This bot is built to catch those mistakes, not to promise profit. Run it on paper
