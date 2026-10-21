@@ -63,7 +63,7 @@ python -m tradebot run --once             # one decision, places paper orders
 python -m tradebot run                    # loop forever (poll_seconds in config)
 ```
 
-**Run it in the cloud for free:** see `deploy/oracle/ORACLE_GUIDE.md` (Oracle Always Free VM, set up entirely from an iPhone).
+**Run it in the cloud for free:** `deploy/github-actions/` (GitHub Actions, no card needed) or `deploy/oracle/ORACLE_GUIDE.md` (Oracle Always Free VM, needs a card for verification).
 
 **Daily timeframe tip:** with `timeframe: 1Day` you only need one decision per day.
 Instead of a 24/7 loop, schedule `python -m tradebot run --once` with cron, e.g. a few

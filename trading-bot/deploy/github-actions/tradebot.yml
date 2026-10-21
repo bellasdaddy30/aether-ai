@@ -1,0 +1,99 @@
+# Runs tradebot once a day on GitHub's servers. Free, no machine of yours needs to be on.
+# Lives at .github/workflows/tradebot.yml in the runner repo.
+#
+# Needs two repo secrets (Settings -> Secrets and variables -> Actions):
+#   ALPACA_API_KEY, ALPACA_SECRET_KEY   (PAPER keys)
+# Real-money trading is impossible from this workflow: it never passes --live.
+name: tradebot
+
+on:
+  schedule:
+    # 19:30 UTC daily = 3:30pm New York in summer, 2:30pm in winter.
+    # GitHub cron is UTC-only and can start late by 5-30 min, so this leaves room before the 4pm close.
+    # Weekends: stocks are skipped automatically (market closed), crypto still trades.
+    - cron: "30 19 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run = decide but send no orders; paper = place paper orders"
+        type: choice
+        options: [dry-run, paper]
+        default: dry-run
+
+permissions:
+  contents: write   # to save state/ and logs/ back to the repo
+
+concurrency:
+  group: tradebot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -q -r requirements.txt
+
+      - name: Check secrets
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: |
+          if [ -z "$ALPACA_API_KEY" ] || [ -z "$ALPACA_SECRET_KEY" ]; then
+            echo "::error::Add ALPACA_API_KEY and ALPACA_SECRET_KEY under Settings -> Secrets and variables -> Actions"
+            exit 1
+          fi
+
+      - name: Run bot
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          TRADEBOT_ALLOW_LIVE: "no"
+          MODE: ${{ github.event.inputs.mode || 'paper' }}
+        run: |
+          set -o pipefail
+          FLAGS="--once"
+          if [ "$MODE" = "dry-run" ]; then FLAGS="$FLAGS --dry-run"; fi
+          echo "mode=$MODE"
+          python -m tradebot -c config.yaml run $FLAGS 2>&1 | tee run.log
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## tradebot ${{ github.event.inputs.mode || 'paper' }} run"
+            echo '```'
+            grep -E "equity=|ERROR|WARNING|BUY|SELL|Traceback|Error" run.log 2>/dev/null | tail -40 || echo "no output"
+            echo '```'
+            if [ -f logs/trades.csv ]; then
+              echo "### Last 10 orders"
+              echo '```'
+              tail -n 10 logs/trades.csv
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save state and trade log
+        if: always()
+        run: |
+          git config user.name "tradebot"
+          git config user.email "tradebot@users.noreply.github.com"
+          git add -f state logs 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "nothing to save"
+            exit 0
+          fi
+          git commit -q -m "bot: run $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do
+            git pull -q --rebase origin "${GITHUB_REF_NAME}" && git push -q origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            sleep $((i * 5))
+          done
+          echo "::warning::could not push state; next run starts from the previous state"
